@@ -1,53 +1,47 @@
-import streamlit as st
-import joblib
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
 
-# Load the trained model
-model = joblib.load('hemaa.pkl')
+# Load the dataset, handling commas in numeric columns
+data = pd.read_csv('/content/csp.csv', thousands=',') # Handle commas
 
-# Streamlit app title
-st.title('Net Profit Prediction')
+# Define features and target
+features =[
+    'Year', 'Total net production volume (kg)',
+    'Expected price (Euro/Kg)', 'Revenue (Euro)', 'Yearly Fixed cost', 'Variable cost',
+    'Cash Flow'
+] # Removed extra brackets
+target = 'Net Profit'
 
-# User input section for features
-st.sidebar.header('Input Features')
-start_year = st.sidebar.number_input('Start Year', min_value=2000, max_value=2100, step=1)
-end_year = st.sidebar.number_input('End Year', min_value=2000, max_value=2100, step=1)
-production_volume = st.sidebar.number_input('Total net production volume (kg)')
-expected_price = st.sidebar.number_input('Expected price (Euro/Kg)')
-revenue = st.sidebar.number_input('Revenue (Euro)')
-fixed_cost = st.sidebar.number_input('Yearly Fixed cost')
-variable_cost = st.sidebar.number_input('Variable cost')
-cash_flow = st.sidebar.number_input('Cash Flow')
+# Separate features and target
+X = data[features] # Use features list directly
+y = data[target]
 
-# Generate predictions for each year in the range
-years = list(range(start_year, end_year + 1))
-predictions = []
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-for year in years:
-    input_data = pd.DataFrame({
-        'Year': [year],
-        'Total net production volume (kg)': [production_volume],
-        'Expected price (Euro/Kg)': [expected_price],
-        'Revenue (Euro)': [revenue],
-        'Yearly Fixed cost': [fixed_cost],
-        'Variable cost': [variable_cost],
-        'Cash Flow': [cash_flow]
-    })
-    prediction = model.predict(input_data)
-    predictions.append(prediction[0])
+# Initialize and train the model
+model = LinearRegression()
+model.fit(X_train, y_train)
 
-# Display predictions
-if st.sidebar.button('Predict'):
-    st.write(f'Predicted Net Profit from {start_year} to {end_year}')
-    for year, pred in zip(years, predictions):
-        st.write(f'Year {year}: €{pred:,.2f}')
+# Make predictions
+y_pred = model.predict(X_test)
 
-    # Plotting the predictions
-    fig, ax = plt.subplots()
-    ax.plot(years, predictions, label='Predicted Net Profit', marker='o')
-    ax.set_xlabel('Year')
-    ax.set_ylabel('Net Profit (€)')
-    ax.set_title('Net Profit Prediction Over Time')
-    ax.legend()
-    st.pyplot(fig)
+# Calculate model accuracy
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+print(f"Mean Squared Error: {mse}")
+print(f"R^2 Score: {r2}")
+
+# Plot predictions against actual values
+plt.figure(figsize=(10, 6))
+plt.scatter(data['Year'], y, color='blue', label='Actual Net Profit')
+plt.scatter(data['Year'].iloc[X_test.index], y_pred, color='red', label='Predicted Net Profit')
+plt.xlabel('Year')
+plt.ylabel('Net Profit')
+plt.title('Net Profit Prediction')
+plt.legend()
+plt.show()
