@@ -64,7 +64,7 @@ if st.sidebar.button('Predict'):
         'Variable cost': [variable_cost],
         'Cash Flow': [cash_flow]
     })
-    explainer = shap.TreeExplainer(model)
+    explainer = shap.KernelExplainer(model.predict, input_data)
     shap_values = explainer.shap_values(input_data)
     shap.summary_plot(shap_values, input_data, plot_type="bar")
     st.pyplot(bbox_inches='tight')
