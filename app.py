@@ -40,7 +40,7 @@ for year in years:
     predictions.append(prediction[0])
 
 # Assuming you have actual net profit data for comparison
-actual_net_profit = [/* Your actual net profit data here */]
+actual_net_profit = [/content/csp.csv /]
 
 # Display predictions
 if st.sidebar.button('Predict'):
