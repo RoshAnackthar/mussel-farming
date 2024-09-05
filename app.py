@@ -2,6 +2,7 @@ import streamlit as st
 import joblib
 import pandas as pd
 import matplotlib.pyplot as plt
+import shap
 
 # Load the trained model
 model = joblib.load('hemaa.pkl')
@@ -52,3 +53,19 @@ if st.sidebar.button('Predict'):
     ax.set_title('Net Profit Prediction Over Time')
     ax.legend()
     st.pyplot(fig)
+
+    # Feature importance analysis using SHAP
+    st.write("### Feature Importance Analysis")
+    input_data = pd.DataFrame({
+        'Year': [start_year],
+        'Total net production volume (kg)': [production_volume],
+        'Expected price (Euro/Kg)': [expected_price],
+        'Revenue (Euro)': [revenue],
+        'Yearly Fixed cost': [fixed_cost],
+        'Variable cost': [variable_cost],
+        'Cash Flow': [cash_flow]
+    })
+    explainer = shap.TreeExplainer(model)
+    shap_values = explainer.shap_values(input_data)
+    shap.summary_plot(shap_values, input_data, plot_type="bar")
+    st.pyplot(bbox_inches='tight')
