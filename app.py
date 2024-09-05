@@ -39,18 +39,22 @@ for year in years:
     prediction = model.predict(input_data)
     predictions.append(prediction[0])
 
+# Assuming you have actual net profit data for comparison
+actual_net_profit = [/* Your actual net profit data here */]
+
 # Display predictions
 if st.sidebar.button('Predict'):
     st.write(f'Predicted Net Profit from {start_year} to {end_year + future_years}')
     for year, pred in zip(years, predictions):
         st.write(f'Year {year}: €{pred:,.2f}')
 
-    # Plotting the predictions
+    # Plotting the predictions and actual net profit
     fig, ax = plt.subplots()
-    ax.plot(years, predictions, label='Predicted Net Profit', marker='o')
+    ax.scatter(years, predictions, label='Predicted Net Profit', color='red')
+    ax.scatter(years[:len(actual_net_profit)], actual_net_profit, label='Actual Net Profit', color='blue')
     ax.set_xlabel('Year')
     ax.set_ylabel('Net Profit (€)')
-    ax.set_title('Net Profit Prediction Over Time')
+    ax.set_title('Net Profit Prediction')
     ax.legend()
     st.pyplot(fig)
 
