@@ -12,8 +12,7 @@ st.title('Net Profit Prediction')
 
 # User input section for features
 st.sidebar.header('Input Features')
-start_year = st.sidebar.number_input('Start Year', min_value=2000, max_value=2100, step=1)
-end_year = st.sidebar.number_input('End Year', min_value=2000, max_value=2100, step=1)
+year = st.sidebar.number_input('Year', min_value=2000, max_value=2100, step=1)
 future_years = st.sidebar.number_input('Years into the Future', min_value=0, max_value=100, step=1)
 production_volume = st.sidebar.number_input('Total net production volume (kg)')
 expected_price = st.sidebar.number_input('Expected price (Euro/Kg)')
@@ -22,13 +21,13 @@ fixed_cost = st.sidebar.number_input('Yearly Fixed cost')
 variable_cost = st.sidebar.number_input('Variable cost')
 cash_flow = st.sidebar.number_input('Cash Flow')
 
-# Generate predictions for each year in the range
-years = list(range(start_year, end_year + 1)) + list(range(end_year + 1, end_year + 1 + future_years))
+# Generate predictions for each future year
+years = list(range(year, year + future_years + 1))
 predictions = []
 
-for year in years:
+for future_year in years:
     input_data = pd.DataFrame({
-        'Year': [year],
+        'Year': [future_year],
         'Total net production volume (kg)': [production_volume],
         'Expected price (Euro/Kg)': [expected_price],
         'Revenue (Euro)': [revenue],
@@ -39,19 +38,15 @@ for year in years:
     prediction = model.predict(input_data)
     predictions.append(prediction[0])
 
-# Assuming you have actual net profit data for comparison
-actual_net_profit = [/content/csp.csv /]
-
 # Display predictions
 if st.sidebar.button('Predict'):
-    st.write(f'Predicted Net Profit from {start_year} to {end_year + future_years}')
-    for year, pred in zip(years, predictions):
-        st.write(f'Year {year}: €{pred:,.2f}')
+    st.write(f'Predicted Net Profit from {year} to {year + future_years}')
+    for future_year, pred in zip(years, predictions):
+        st.write(f'Year {future_year}: €{pred:,.2f}')
 
-    # Plotting the predictions and actual net profit
+    # Plotting the predictions
     fig, ax = plt.subplots()
-    ax.scatter(years, predictions, label='Predicted Net Profit', color='red')
-    ax.scatter(years[:len(actual_net_profit)], actual_net_profit, label='Actual Net Profit', color='blue')
+    ax.plot(years, predictions, label='Predicted Net Profit', color='red', marker='o')
     ax.set_xlabel('Year')
     ax.set_ylabel('Net Profit (€)')
     ax.set_title('Net Profit Prediction')
@@ -61,7 +56,7 @@ if st.sidebar.button('Predict'):
     # Feature importance analysis using SHAP
     st.write("### Feature Importance Analysis")
     input_data = pd.DataFrame({
-        'Year': [start_year],
+        'Year': [year],
         'Total net production volume (kg)': [production_volume],
         'Expected price (Euro/Kg)': [expected_price],
         'Revenue (Euro)': [revenue],
